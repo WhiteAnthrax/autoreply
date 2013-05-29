@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+### /home/anthrax/Program/autoreply/vacation.pl
+### created: May 28,2013 Tuesday 22:32:12
+### author: anthrax(KAWAHARA Masashi)
+### $Id$
+
+#  Last modified Wed May 29 14:03:10 2013 on joker
+#  Update count: 2
+
+use Sys::Syslog qw(:DEFAULT setlogsock);
+
+my $SELF = 'vacation.pl';
+
+my $SENDMAIL = "/usr/sbin/sendmail";
+#my $returnpath = '';
+
+my $EX_OK = 0;
+my $EX_TEMPFAIL = 75;
+my $EX_UNAVAILABLE = 69;
+
+setlogsock('unix');
+openlog($SELF, 'ndelay,pid', 'mail');
+
+if ( @ARGV != 2) {
+    syslog('err', "error: Invalid invocation (expecting 2 argument)");
+    exit($EX_TEMPFAIL);
+} else {
+    $sender = $ARGV[0];
+    $mailbox = $ARGV[1];
+}
+
+if (! -x $SENDMAIL) {
+    syslog('err', "error: $SENDMAIL not found or not executable");
+    exit($EX_TEMPFAIL);
+}
+
+# don't answer special user
+if ($sender eq "" || $sender =~ /^owner-|-(request|owner)\@|^(mailer-daemon|postmaster|vacation)\@/i) {
+   exit($EX_OK);
+}
+
+# check Precedence header
+while ( <STDIN> ) {
+    last if (/^$/);
+    exit($EX_OK) if (/^precedence:\s+(bulk|list|junk)/i);
+}
+
+# open autoreply message
+
+syslog('err', "debug: sender=$sender, mailbox=$mailbox");
+
+#my ($to, $from, $subject, $body) = @_;
+#   open (MAIL, "| $sendmail " . "-r $returnpath -t ") or die ("Unable to open sendmail");
+#open (MAIL, "| $sendmail -t ") or die ("Unable to open sendmail");
+#print MAIL "From: $to\n";
+#print MAIL "To: $from\n";
+#print MAIL "Subject: $subject\n";
+#print MAIL "X-Loop: jamcp virtual vacation\n\n";
+#print MAIL "$body";
+#close (MAIL);
+
+
+exit($EX_OK);
